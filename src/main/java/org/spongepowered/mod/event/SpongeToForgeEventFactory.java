@@ -464,6 +464,16 @@ public class SpongeToForgeEventFactory {
         }
 
         forgeEvent.setCanceled(spongeEvent.isCancelled());
+        if (forgeEvent instanceof PlayerInteractEvent.RightClickBlock) {
+            final PlayerInteractEvent.RightClickBlock event = (PlayerInteractEvent.RightClickBlock) forgeEvent;
+            InteractBlockEvent.Secondary secondary = (InteractBlockEvent.Secondary) spongeEvent;
+            if (secondary.getUseItemResult() != Tristate.UNDEFINED) {
+                event.setUseItem(getResultFromTristate(secondary.getUseItemResult()));
+            }
+            if (secondary.getUseBlockResult() != Tristate.UNDEFINED) {
+                event.setUseBlock(getResultFromTristate(secondary.getUseBlockResult()));
+            }
+        }
         forgeEventBus.forgeBridge$post(eventData);
         if (forgeEvent instanceof PlayerInteractEvent.RightClickBlock) {
             final PlayerInteractEvent.RightClickBlock event = (PlayerInteractEvent.RightClickBlock) forgeEvent;
@@ -1023,5 +1033,14 @@ public class SpongeToForgeEventFactory {
         }
 
         return Tristate.UNDEFINED;
+    }
+
+    private static net.minecraftforge.fml.common.eventhandler.Event.Result getResultFromTristate(final Tristate tristate) {
+        if (tristate == Tristate.TRUE) {
+            return net.minecraftforge.fml.common.eventhandler.Event.Result.ALLOW;
+        } else if (tristate == Tristate.FALSE) {
+            return net.minecraftforge.fml.common.eventhandler.Event.Result.DENY;
+        }
+        return net.minecraftforge.fml.common.eventhandler.Event.Result.DEFAULT;
     }
 }
